@@ -6,7 +6,7 @@ Samsung Galaxy S II smartphones. The web address describes the precise measureme
 The folder UCI Har Dataset contains txt files used in the project. These are the test/training sets, feature names, activity labels, y_ files containing activity encoded numbers 
 corresponding to activity type, and subject for each observation in the test/training sets 
 
-List of important variables used in the code
+List of important data frames in the code
 * data: test/train data frame 
 * meanSubAct: data frame with mean across features for subject/activity pairs
 
