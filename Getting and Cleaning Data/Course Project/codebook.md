@@ -10,7 +10,7 @@ List of important data frames in the code
 * data: test/train data frame 
 * meanSubAct: data frame with mean across features for subject/activity pairs
 
-Imported data
+Imported data in the code
 * test: test set
 * train: training set 
 * features: feature names 
