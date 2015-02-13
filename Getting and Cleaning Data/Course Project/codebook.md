@@ -6,19 +6,16 @@ Samsung Galaxy S II smartphones. The web address describes the precise measureme
 The folder UCI Har Dataset contains txt files used in the project. These are the test/training sets, feature names, activity labels, y_ files containing activity encoded numbers 
 corresponding to activity type, and subject for each observation in the test/training sets 
 
-The script for the course project is called run_analysis.R. First, set your working directory to the folder UCI HAR Dataset.
-The first part of the script imports the necessary files. 
+List of important variables used in the code
+* data: test/train data frame 
+* meanSubAct: data frame with mean across features for subject/activity pairs
 
-Next, the **column names of the test and training set are assigned by the imported features**. This is the give descriptive variable
-names part of the assignment. These **data frames are merged**, the training set following the test set.
-The merged data is called data. Next, **only the 
-variables containing the means and standard deviations are needed, so the code subsets on these**. Any variable containing the 
-strings "mean" and "std" is kept. Next, subject and activity are added as additional variables in data. The **activity variable in data is then converted to the descriptive titles** from the activity_labels txt file.
-This was also requested in the project.   
-
-The final part of the code creates the dataframe meanSubAct that **records the mean for all variables in data by 
-subject and activity**. This is done with the tapply function and a for loop. The data is in wide format, each row contains a subject/activity
-pair along with the means across all features. 
-
-Finally the two data frames generated in this script are written to disk as txt files. Data in mergeData.txt and meanSubAct
-in meanSubjectActivity.txt. Both txt files are contained in this repository. 
+Imported data
+* test: test set
+* train: training set 
+* features: feature names 
+* subjectTest: subjects for test set
+* subjectTrain: subjects for training set
+* y_test: activity numbers for test set
+* y_train: activity numbers for training set
+* activity_labels: descriptive labels for activities
