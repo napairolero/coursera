@@ -1,0 +1,152 @@
+## Improper Exercise Classication with Accelerometers
+### Nicholas Pairolero
+Recently several devices have been developed that allow users to track how much of an exercise completed. For example, the fitbit charge tracks things like steps taken, calories burned and floors climbed. These devices do not track how well an exercise was completed. The user might have spent an hour exercising at risk to serious injury if doing squats and other lifts improperly. This paper develops a machine learning algorithm that begins to address this issue. The data set comes from a group of researches who conducted a similar exercise, although the data cleaning and algorithms used are of this authors choice. 6 users were tracked in the lab using four accelerometers during a relatively simple lift; the dumbell curl. The participants conducted the lifts properly and in four improper ways. For example, one of the improper ways was to swing the hips forward during the curl. Two models are evaluated against one another using 10 fold cross validation. The most accurate algorithm identifed is able to classify 100% of the observations accurately in the test set; that is, the data set not used to select and train the model. Although the algorithm was very successful, it is unreasonable to think that an ordinary user would wear four accelerometers to the gym. Future research in this area would seek to find accurate machine learning classifiers that only use sensors people are likely to wear. 
+
+### Data Documentation
+The documentation for the data comes from http://groupware.les.inf.puc-rio.br/har and the citation is contained at the end of this document.
+
+### Download and Clean Data
+First download and read the data.
+
+```{r cache=TRUE}
+temp <- tempfile()
+download.file("http://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv", temp)
+train <- read.csv(temp)
+unlink(temp)
+train <- train[ , -1]
+
+temp <- tempfile()
+download.file("http://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv", temp)
+test <- read.csv(temp)
+unlink(temp)
+test <- test[, -1]
+```
+
+Lets take a look at NA values in the data set. 
+
+```{r}
+sum(apply(train,2, function(x) any(is.na(x))))
+numNACol <- apply(train, 2, function(x) sum(is.na(x)) )
+sum(numNACol > .8* length(train[,1]))
+```
+
+Notice that all columns with NA values have at least 80% of their values as NA. Given all the missing data in any column with one NA value, I'll just remove any column with NA's.
+
+```{r}
+train <- train[ , !apply(train, 2, function(x) any(is.na(x)))]
+test <- test[  , !apply(test, 2, function(x) any(is.na(x)))]
+```
+
+There are also a lot of columns that are almost completely full of empty character strings. I'll remove these features from the data set as well.
+
+```{r}
+train <- train[ , !(apply(train, 2, function(x) sum( x == "")) > 0)]
+test <- test[ , !(apply(train, 2, function(x) sum( x == "")) > 0)]
+```
+
+The final features I'll get rid of are the time, window and name features. From the online documentation,
+
+"Six young health participants were asked to perform one set of 10 repetitions of the Unilateral Dumbbell Biceps Curl in five different fashions: exactly according to the specification (Class A), throwing the elbows to the front (Class B), lifting the dumbbell only halfway (Class C), lowering the dumbbell only halfway (Class D) and throwing the hips to the front (Class E)"
+
+If the individuals were allowed to do the excercise without being told which class, then perhaps they might start out doing it properly but get tired toward the end. In this case time could have some predictive power. But since the participants were directed on which classe to complete the excercise in, time could only bias out of sample prediction. 
+
+The window features will be deleted since they don't appear to be related to the sensors in any meaningful way. Finally, the names are deleted because the participants were guided on which classe to perform and the purpose of the algorithm is to predict bad form outside the lab.
+
+```{r}
+train <- train[ , -c(1,2,3,4,5,6)]
+test <- test[ , -c(1,2,3,4,5,6)]
+```
+
+### Modeling
+10 fold cross validation will be used to evaluate two different models in the training set. The first model is the decision tree with bootstrap aggregation. The second model is the random forest. Since two models will be evaluated against one another, the training set must be subdivided once more to get an out of training estimate of accuracy for the best model.
+
+```{r }
+set.seed(511)
+originalTrain <- train
+originalTest <- test
+library(caret)
+inTrain <- createDataPartition(y=train$classe, p=.75, list=FALSE)
+train <- train[inTrain, ]
+test <- train[-inTrain, ]
+folds <- createFolds(y=train$classe, k=10, list=TRUE, returnTrain=TRUE)
+```
+
+For bootstrap aggregation, on each fold several bootstrapped samples will be produced. Each bootstrapped samples is the size of the fold. Then every bootstrapped sample will be used to build a tree. The final prediction for a given fold will use the average of each model built with the bootstrapped samples. I coded the bagging algorithm for practice, but R does have packages that do this for the user already.
+
+```{r cache = TRUE}
+library(rpart)
+Mode <- function(x) {
+  ux <- unique(x)
+  tab <- tabulate(match(x,ux))
+  ux[tab == max(tab)]
+}
+n <- 10
+accuracyBag <- numeric(length(folds))
+for (i in 1:length(folds)){
+  samples <- matrix("", n, length(folds[[i]]))
+  trainFold <- train[folds[[i]], ] 
+  testFold <- train[-folds[[i]], ]
+  predFold <- matrix( , n, length(testFold[,1]))
+  for (j in 1:n){
+    samples[j,] <- sample(1:length(folds[[i]]), replace = TRUE)
+    trainBoot <- trainFold[samples[j, ], ]
+    modBoot <- rpart(classe ~ . , data = trainBoot, method="class")
+    predFold[j,] <- as.character(predict(modBoot, testFold, type="class"))
+  }
+  finalPred <- character(length(testFold[,1]))  
+  for (j in 1:length(testFold[,1])){
+      finalPred[j] <- sample(Mode(predFold[ , j]), 1)
+  }
+  accuracyBag[i] <- sum(finalPred == as.character(testFold$classe))/length(testFold[,1])
+}
+```
+
+Now lets run the random forest using the randomForest package. The random forest is like bootstrap aggregation, except that at each split of the tree a random subset of features will be evaluated, rather than the entire set. This has the effect of decorrelating the trees between bootstrapped samples. 
+
+```{r cache = TRUE}
+library(randomForest)
+accuracyForest <- numeric(length(folds))
+for (i in 1:length(folds)){
+  trainFold <- train[folds[[i]], ] 
+  testFold <- train[-folds[[i]], ]
+  modFold <- randomForest(classe ~ . , data = trainFold, ntree=10)
+  predFold <- predict(modFold, testFold)
+  accuracyForest[i] <- sum(predFold == testFold$classe)/length(testFold$classe) 
+}
+```
+
+Each model has 10 estimates of accuracy since 10 folds were used. To evaluate which model is better, compare the average accuracy over all folds for each model.
+
+```{r}
+mean(accuracyBag)
+mean(accuracyForest)
+```
+
+The random forest has a much higher average. Just to be safe check the variances as well
+
+```{r}
+var(accuracyBag)
+var(accuracyForest)
+```
+
+The variances are both very small so I'll take the random forest for its much higher accuracy. To get an idea of out of training accuracy, the test set created from the original training set will be used. Its important to use test data not used for model selection to get an idea of expected model accuracy. Accuracy from the data the model was chosen from might be biased because of the fact that the model was chosen from it. Random forest accuracy on the independent test set is
+
+```{r}
+library(randomForest)
+mod <- randomForest(classe ~ . , data = train, ntree=10)
+pred <- predict(mod, test)
+sum(pred == test$classe)/length(test$classe) 
+```
+
+The random forest does extremely well at 100% accuracy.The algorithms prediction on the original test data (the data that doesn't give the true classification) is
+
+```{r}
+mod <- randomForest(classe ~ . , data = originalTrain, ntree=10)
+testPred <- predict(mod, originalTest)
+```
+
+### Conclusion
+This paper evaluted two machine learning algorithms to classifiy proper and improper excercise using accelerometer data. The random forest was the better of the two models and was able to classify at 100% accuracy in the independent test set. Further research would use data obtained by sensors that people might reasonably wear.
+
+### Citation
+Ugulino, W.; Cardador, D.; Vega, K.; Velloso, E.; Milidiu, R.; Fuks, H. Wearable Computing: Accelerometers' Data Classification of Body Postures and Movements. Proceedings of 21st Brazilian Symposium on Artificial Intelligence. Advances in Artificial Intelligence - SBIA 2012. In: Lecture Notes in Computer Science. , pp. 52-61. Curitiba, PR: Springer Berlin / Heidelberg, 2012. ISBN 978-3-642-34458-9. DOI: 10.1007/978-3-642-34459-6_6. 
