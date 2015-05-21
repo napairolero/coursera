@@ -1,0 +1,54 @@
+---
+title       : Shiny App Pitch
+subtitle    : 
+author      : Nicholas Pairolero
+job         : 
+framework   : io2012       # {io2012, html5slides, shower, dzslides, ...}
+highlighter : highlight.hs  # {highlight.js, prettify, highlight}
+hitheme     : tomorrow      # 
+widgets     : []            # {mathjax, quiz, bootstrap}
+mode        : selfcontained # {standalone, draft}
+knit        : slidify::knit2slides
+---
+
+## Application Motivation
+Have you ever wondered how MPG today compares to way back in 1974?
+
+1. If you answered yes, continue on.
+2. If no, you may kindly exit.
+
+---  
+
+## Application Structure
+The shiny app
+
+1. Guides the user to motor trend to pick any 2015 model
+2. Requests three fields; cylinder, horsepower and weight. All data available on motor trend.
+4. Trains linear regression on the mtcars data set from 1974.
+5. Predicts mpg for the inputed data.
+6. Asks the user to compare this to the actual mpg from motor trend.
+
+---
+
+## Model Details
+The shiny app runs the following code to obtain the predicted 1974 mpg
+
+```{r}
+cylVal <- 4; hpVal <- 400; wtVal <- 2 #these values supplied by user
+data(mtcars)
+data <- mtcars
+data$cyl <- factor(data$cyl)
+reg <- lm(mpg ~ wt + cyl + hp, data = data)
+newData <- data.frame("cyl" = factor(cylVal), "hp" = hpVal, "wt" = wtVal)
+predict(reg, newData)
+```
+
+---
+
+## Thanks!
+Thanks for listening to my pitch. The shiny app is accessable via the following link. Enjoy!
+
+https://napairolero.shinyapps.io/dataProducts/
+
+
+

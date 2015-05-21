@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Shiny App Pitch</title>
+  <meta charset="utf-8">
+  <meta name="description" content="Shiny App Pitch">
+  <meta name="author" content="Nicholas Pairolero">
+  <meta name="generator" content="slidify" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta http-equiv="X-UA-Compatible" content="chrome=1">
+  <link rel="stylesheet" href="libraries/frameworks/io2012/css/default.css" media="all" >
+  <link rel="stylesheet" href="libraries/frameworks/io2012/css/phone.css" 
+    media="only screen and (max-device-width: 480px)" >
+  <link rel="stylesheet" href="libraries/frameworks/io2012/css/slidify.css" >
+  <link rel="stylesheet" href="libraries/highlighters/highlight.hs/css/tomorrow.css" />
+  <base target="_blank"> <!-- This amazingness opens all links in a new tab. -->  <link rel=stylesheet href="./assets/css/ribbons.css"></link>
+
+  
+  <!-- Grab CDN jQuery, fall back to local if offline -->
+  <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.7.min.js"></script>
+  <script>window.jQuery || document.write('<script src="libraries/widgets/quiz/js/jquery.js"><\/script>')</script> 
+  <script data-main="libraries/frameworks/io2012/js/slides" 
+    src="libraries/frameworks/io2012/js/require-1.0.8.min.js">
+  </script>
+  
+  
+
+</head>
+<body style="opacity: 0">
+  <slides class="layout-widescreen">
+    
+    <!-- LOGO SLIDE -->
+        <slide class="title-slide segue nobackground">
+  <hgroup class="auto-fadein">
+    <h1>Shiny App Pitch</h1>
+    <h2></h2>
+    <p>Nicholas Pairolero<br/></p>
+  </hgroup>
+  <article></article>  
+</slide>
+    
+
+    <!-- SLIDES -->
+    <slide class="" id="slide-1" style="background:;">
+  <hgroup>
+    <h2>Application Motivation</h2>
+  </hgroup>
+  <article data-timings="">
+    <p>Have you ever wondered how MPG today compares to way back in 1974?</p>
+
+<ol>
+<li>If you answered yes, continue on.</li>
+<li>If no, you may kindly exit.</li>
+</ol>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-2" style="background:;">
+  <hgroup>
+    <h2>Application Structure</h2>
+  </hgroup>
+  <article data-timings="">
+    <p>The shiny app</p>
+
+<ol>
+<li>Guides the user to motor trend to pick any 2015 model</li>
+<li>Requests three fields; cylinder, horsepower and weight. All data available on motor trend.</li>
+<li>Trains linear regression on the mtcars data set from 1974.</li>
+<li>Predicts mpg for the inputed data.</li>
+<li>Asks the user to compare this to the actual mpg from motor trend.</li>
+</ol>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-3" style="background:;">
+  <hgroup>
+    <h2>Model Details</h2>
+  </hgroup>
+  <article data-timings="">
+    <p>The shiny app runs the following code to obtain the predicted 1974 mpg</p>
+
+<pre><code class="r">cylVal &lt;- 4; hpVal &lt;- 400; wtVal &lt;- 2 #these values supplied by user
+data(mtcars)
+data &lt;- mtcars
+data$cyl &lt;- factor(data$cyl)
+reg &lt;- lm(mpg ~ wt + cyl + hp, data = data)
+newData &lt;- data.frame(&quot;cyl&quot; = factor(cylVal), &quot;hp&quot; = hpVal, &quot;wt&quot; = wtVal)
+predict(reg, newData)
+</code></pre>
+
+<pre><code>##        1 
+## 20.23526
+</code></pre>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-4" style="background:;">
+  <hgroup>
+    <h2>Thanks!</h2>
+  </hgroup>
+  <article data-timings="">
+    <p>Thanks for listening to my pitch. The shiny app is accessable via the following link. Enjoy!</p>
+
+<p><a href="https://napairolero.shinyapps.io/dataProducts/">https://napairolero.shinyapps.io/dataProducts/</a></p>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+    <slide class="backdrop"></slide>
+  </slides>
+  <div class="pagination pagination-small" id='io2012-ptoc' style="display:none;">
+    <ul>
+      <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=1 title='Application Motivation'>
+         1
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=2 title='Application Structure'>
+         2
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=3 title='Model Details'>
+         3
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=4 title='Thanks!'>
+         4
+      </a>
+    </li>
+  </ul>
+  </div>  <!--[if IE]>
+    <script 
+      src="http://ajax.googleapis.com/ajax/libs/chrome-frame/1/CFInstall.min.js">  
+    </script>
+    <script>CFInstall.check({mode: 'overlay'});</script>
+  <![endif]-->
+</body>
+  <!-- Load Javascripts for Widgets -->
+  
+   
+  </html>
